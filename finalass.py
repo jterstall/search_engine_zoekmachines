@@ -54,7 +54,8 @@ if __name__ == '__main__':
 	#make json dump
 	dump = json.dumps(o) # '{"e": {"a": ["text", "text"]}}'
 	#e.g. simple search for "Japan" in text
-	print(first_arg)
+	helpers.bulk(es,telegraaf)
+	
 	HOST = 'http://localhost:9200/'
 	es = Elasticsearch(hosts=[HOST])
 	query={
@@ -69,10 +70,10 @@ if __name__ == '__main__':
 	telegraaf = list()
 	for i in range(len(o['pm:KBroot']['pm:root'])):
 		telegraaf.append({'_type':'article', '_index':'telegraaf', 'id':i, 'date':get_date(i), 'title':get_title(i), 'text':get_text(i), 'link':"http://kranten.kb.nl/view/article/id/" + get_link(i)})
-	for i in range(len(es.search(body=query)["hits"]["hits"])):
-		print(es.search(body=query)["hits"]["hits"][i]["_source"]["title"] + "\n")
-		print(es.search(body=query)["hits"]["hits"][i]["_source"]["text"] + "\n").encode("utf-8")
+	for j in range(len(es.search(body=query)["hits"]["hits"])):
+		print(es.search(body=query)["hits"]["hits"][j]["_source"]["title"] + "\n")
+		print(es.search(body=query)["hits"]["hits"][j]["_source"]["text"] + "\n").encode("utf-8")
 		try:
-			print(es.search(body=query)["hits"]["hits"][i]["_source"]["link"] + "\n")
+			print(es.search(body=query)["hits"]["hits"][j]["_source"]["link"] + "\n")
 		except(KeyError):
 			print("No link \n")
