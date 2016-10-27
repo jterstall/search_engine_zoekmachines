@@ -5,8 +5,6 @@ from elasticsearch import  helpers
 from elasticsearch import Elasticsearch
 import sys
 
-first_arg = sys.argv[1]
-
 # GET DATE FROM ARTICLE
 def get_date(i):
     return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:date']['#text']
@@ -37,43 +35,43 @@ def get_text(i):
 
 def get_link(i):
     try:
-        return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:identifier']['#text'] 
+        return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:identifier']['#text']
     except (KeyError):
         return ''
- 
 
-if __name__ == '__main__':	
+
+if __name__ == '__main__':
 	# open and read gzipped xml file
-	infile = gzip.open('telegraaf-1951.xml.gz')
-	content = infile.read()
-	es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+	# infile = gzip.open('telegraaf-1951.xml.gz')
+	# content = infile.read()
+    es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-	o = xmltodict.parse(content)
+	# o = xmltodict.parse(content)
 
 	# use xmltodict to convert xml file to json (elasticsearch needs json input)
 	#make json dump
-	dump = json.dumps(o) # '{"e": {"a": ["text", "text"]}}'
+	# dump = json.dumps(o) # '{"e": {"a": ["text", "text"]}}'
 	#e.g. simple search for "Japan" in text
-	helpers.bulk(es,telegraaf)
-	
-	HOST = 'http://localhost:9200/'
-	es = Elasticsearch(hosts=[HOST])
-	query={
-	  "query": {
-	    "bool": {
-	        "must": [
-	              { "match": {"text": first_arg}}
-	        ]
-	    }
-	  }
-	}
-	telegraaf = list()
-	for i in range(len(o['pm:KBroot']['pm:root'])):
-		telegraaf.append({'_type':'article', '_index':'telegraaf', 'id':i, 'date':get_date(i), 'title':get_title(i), 'text':get_text(i), 'link':"http://kranten.kb.nl/view/article/id/" + get_link(i)})
-	for j in range(len(es.search(body=query)["hits"]["hits"])):
-		print(es.search(body=query)["hits"]["hits"][j]["_source"]["title"] + "\n")
-		print(es.search(body=query)["hits"]["hits"][j]["_source"]["text"] + "\n").encode("utf-8")
-		try:
-			print(es.search(body=query)["hits"]["hits"][j]["_source"]["link"] + "\n")
-		except(KeyError):
-			print("No link \n")
+	# telegraaf = list()
+	# for i in range(len(o['pm:KBroot']['pm:root'])):
+	# 	telegraaf.append({'_type':'article', '_index':'telegraaf', 'id':i, 'date':get_date(i), 'title':get_title(i), 'text':get_text(i), 'link':"http://kranten.kb.nl/view/article/id/" + get_link(i)})
+	# helpers.bulk(es,telegraaf)
+
+    HOST = 'http://localhost:9200/'
+    es = Elasticsearch(hosts=[HOST])
+    query={
+        "query": {
+            "bool": {
+                "must": [
+                    { "match": {"text": input("Please input a query: ")}}
+                ]
+            }
+        }
+    }
+    for j in range(len(es.search(body=query)["hits"]["hits"])):
+        print(es.search(body=query)["hits"]["hits"][j]["_source"]["title"] + "\n")
+        print(es.search(body=query)["hits"]["hits"][j]["_source"]["text"] + "\n")
+        try:
+            print(es.search(body=query)["hits"]["hits"][j]["_source"]["link"] + "\n")
+        except(KeyError):
+            print("No link \n")

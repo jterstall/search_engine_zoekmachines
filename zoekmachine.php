@@ -11,12 +11,8 @@
 
 
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "root";
-
 if(!empty($_POST['keyword']))
 {
-	$output = passthru("python finalass.py ".$_POST['keyword']);
+	$output = passthru("python3 finalass.py ". $_POST['keyword']);
 	echo $output;
 }
