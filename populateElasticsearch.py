@@ -6,7 +6,7 @@ import os
 
 if __name__ == '__main__':
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-    
+
     # add bulk to elasticsearch
     json_folder = '/home/neoray/Documents/Zoekmachines/Week 8/telegraaf-json/'
 

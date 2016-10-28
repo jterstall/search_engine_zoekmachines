@@ -68,10 +68,15 @@ if __name__ == '__main__':
             }
         }
     }
-    for j in range(len(es.search(body=query)["hits"]["hits"])):
-        print(es.search(body=query)["hits"]["hits"][j]["_source"]["title"] + "\n")
-        print(es.search(body=query)["hits"]["hits"][j]["_source"]["text"] + "\n")
+    # Retrieve total amount of search hits, uncomment for unlimited results
+    # amount_of_results = es.search(body=query, index='_all')['hits']['total']
+    # Or use limited size
+    amount_of_results = 100
+    query = es.search(body=query, index='telegraaf', size=amount_of_results)
+    for result in query['hits']['hits']:
+        print(result['_source']['title'] + "\n")
+        print(result['_source']['text'] + "\n")
         try:
-            print(es.search(body=query)["hits"]["hits"][j]["_source"]["link"] + "\n")
+            print(result['_source']['link'] + "\n")
         except(KeyError):
             print("No link \n")
