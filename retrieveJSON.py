@@ -50,12 +50,12 @@ if __name__ == '__main__':
         filename = folder + fn
         if os.path.isfile(filename):
             print(fn)
-            with open(filename, 'rb') as infile:
+            with open(filename, 'r', encoding='utf-8') as infile:
                 o = xmltodict.parse(infile.read(), xml_attribs=True)
                 for i in range(len(o['pm:KBroot']['pm:root'])):
                     telegraaf.append({'_type':'article', '_index':'telegraaf', 'id':i, 'date':get_date(i, o), 'title':get_title(i, o), 'text':get_text(i, o), 'link':get_link(i, o)})
             destination_file_name = destination_folder + fn.replace('.xml', '.json')
-            with open(destination_file_name, 'w') as destination:
+            with open(destination_file_name, 'w', encoding='utf-8') as destination:
                 json.dump(telegraaf, destination, indent=4)
         telegraaf.clear()
         del o

@@ -41,42 +41,48 @@ def get_link(i):
 
 
 if __name__ == '__main__':
-	# open and read gzipped xml file
-	# infile = gzip.open('telegraaf-1951.xml.gz')
-	# content = infile.read()
-    es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-
-	# o = xmltodict.parse(content)
-
-	# use xmltodict to convert xml file to json (elasticsearch needs json input)
-	#make json dump
-	# dump = json.dumps(o) # '{"e": {"a": ["text", "text"]}}'
-	#e.g. simple search for "Japan" in text
-	# telegraaf = list()
-	# for i in range(len(o['pm:KBroot']['pm:root'])):
-	# 	telegraaf.append({'_type':'article', '_index':'telegraaf', 'id':i, 'date':get_date(i), 'title':get_title(i), 'text':get_text(i), 'link':"http://kranten.kb.nl/view/article/id/" + get_link(i)})
-	# helpers.bulk(es,telegraaf)
-
+    text = input("Please input a query: ")
     HOST = 'http://localhost:9200/'
     es = Elasticsearch(hosts=[HOST])
-    query={
+    # query={
+    #     "query": {
+    #         "bool": {
+    #             "must": [
+    #                 { "match": {"text": text}}
+    #             ]
+    #         }
+    #     }
+    # }
+    # Je kan al gekke queries doen met deze shit zoals: +japan -keizer ofzo
+    # Of title:Japan, boolean, etc.
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
+    query= {
         "query": {
-            "bool": {
-                "must": [
-                    { "match": {"text": input("Please input a query: ")}}
-                ]
+            "query_string": {
+                "default_field": "text",
+                "query" : text
+            }
+        },
+        "aggregations": {
+            "wordCloudInfo" : {
+                "significant_terms" : {"field": "text"}
             }
         }
     }
+
+    # Bij het indexen worden die textvelden boven de 256 niet opgeslagen
+
     # Retrieve total amount of search hits, uncomment for unlimited results
     # amount_of_results = es.search(body=query, index='_all')['hits']['total']
     # Or use limited size
     amount_of_results = 100
     query = es.search(body=query, index='telegraaf', size=amount_of_results)
-    for result in query['hits']['hits']:
-        print(result['_source']['title'] + "\n")
-        print(result['_source']['text'] + "\n")
-        try:
-            print(result['_source']['link'] + "\n")
-        except(KeyError):
-            print("No link \n")
+    print(query['aggregations'])
+    # for result in query['hits']['hits']:
+    #     print(result['_source']['title'] + "\n")
+    #     print(result['_source']['date'] + "\n")
+    #     print(result['_source']['text'] + "\n")
+    #     try:
+    #         print(result['_source']['link'] + "\n")
+    #     except(KeyError):
+    #         print("No link \n")
