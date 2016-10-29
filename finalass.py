@@ -41,20 +41,32 @@ def get_link(i):
 
 
 if __name__ == '__main__':
-    text = input("Please input a query: ")
     HOST = 'http://localhost:9200/'
-    es = Elasticsearch(hosts=[HOST])
-    # query={
-    #     "query": {
-    #         "bool": {
-    #             "must": [
-    #                 { "match": {"text": text}}
-    #             ]
-    #         }
+    es = Elasticsearch(hosts=[HOST], timeout=60)
+    es.indices.clear_cache(index='telegraaf')
+
+    text = input("Please input a query: ")
+    # Run deze twee in terminal
+    # curl -XPUT 'localhost:9200/telegraaf/_mapping/article?pretty' -d'
+    # {
+    #   "properties": {
+    #     "text": {
+    #       "type":     "text",
+    #       "fielddata": true
     #     }
-    # }
-    # Je kan al gekke queries doen met deze shit zoals: +japan -keizer ofzo
-    # Of title:Japan, boolean, etc.
+    #   }
+    # }'
+    # curl -XPUT 'localhost:9200/telegraaf/_mapping/article?pretty' -d'
+    # {
+    #   "properties": {
+    #     "title": {
+    #       "type":     "text",
+    #       "fielddata": true
+    #     }
+    #   }
+    # }'
+
+
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
     query= {
         "query": {
@@ -65,24 +77,22 @@ if __name__ == '__main__':
         },
         "aggregations": {
             "wordCloudInfo" : {
-                "significant_terms" : {"field": "text"}
+                "significant_terms" : {"field": "title"}
             }
         }
     }
-
-    # Bij het indexen worden die textvelden boven de 256 niet opgeslagen
 
     # Retrieve total amount of search hits, uncomment for unlimited results
     # amount_of_results = es.search(body=query, index='_all')['hits']['total']
     # Or use limited size
     amount_of_results = 100
-    query = es.search(body=query, index='telegraaf', size=amount_of_results)
+    query = es.search(body=query, index='telegraaf', size=100)
+    for result in query['hits']['hits']:
+        print(result['_source']['title'] + "\n")
+        print(result['_source']['date'] + "\n")
+        print(result['_source']['text'] + "\n")
+        try:
+            print(result['_source']['link'] + "\n")
+        except(KeyError):
+            print("No link \n")
     print(query['aggregations'])
-    # for result in query['hits']['hits']:
-    #     print(result['_source']['title'] + "\n")
-    #     print(result['_source']['date'] + "\n")
-    #     print(result['_source']['text'] + "\n")
-    #     try:
-    #         print(result['_source']['link'] + "\n")
-    #     except(KeyError):
-    #         print("No link \n")
