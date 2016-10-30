@@ -5,6 +5,9 @@ from elasticsearch import  helpers
 from elasticsearch import Elasticsearch
 import sys
 
+search = sys.argv[1]
+title = sys.argv[2]
+text = sys.argv[3]
 # GET DATE FROM ARTICLE
 def get_date(i):
     return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:date']['#text']
@@ -66,13 +69,11 @@ if __name__ == '__main__':
     #   }
     # }'
 
-
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
     query= {
         "query": {
             "query_string": {
                 "default_field": "text",
-                "query" : text
+                "query" : search
             }
         },
         "aggregations": {
@@ -81,6 +82,36 @@ if __name__ == '__main__':
             }
         }
     }
+    if(title == "Yes" and text == "Yes"):
+        query= {
+            "query": {
+                "query_string": {
+                    "fields" : ['title', 'text'],
+                    "query" : search
+                }
+            },
+            "aggregations": {
+                "wordCloudInfo" : {
+                    "significant_terms" : {"field": "title"}
+                }
+            }
+        }
+    elif(title == "Yes" and text != "Yes"):
+        query= {
+            "query": {
+                "query_string": {
+                    "default_field": "title",
+                    "query" : search
+                }
+            },
+            "aggregations": {
+                "wordCloudInfo" : {
+                    "significant_terms" : {"field": "title"}
+                }
+            }
+        }
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
 
     # Retrieve total amount of search hits, uncomment for unlimited results
     # amount_of_results = es.search(body=query, index='_all')['hits']['total']
