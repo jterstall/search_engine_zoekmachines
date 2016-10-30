@@ -1,4 +1,4 @@
 # search_engine_zoekmachines
 Search engine opdracht voor Zoekmachines
 
-http://imgur.com/eFmWhGr
+![alt tag](http://imgur.com/eFmWhGr)
