@@ -66,26 +66,50 @@ if __name__ == '__main__':
     #   }
     # }'
 
-    query= {
-            "query": {
-                "bool": {
-                    "must": [
-                    {
-                        "query_string": {
-                            "fields" : ["title", "text"],
-                            "query" : search
-                        }
-                    },
-                    {
-                        "range" : {
-                            "date": {
-                                "gte": year + "||/y",
-                                "lte": year + "||/y",
-                                "format": "yyyy"
+    if(title == "Yes" and text == "Yes"):
+        field = ["text", "title"]
+    elif(title == "Yes" and text == "No"):
+        field = ["title"]
+    elif(title == "No" and text == "Yes"):
+        field = ["text"]
+    else:
+        field = ["text", "title"]
+
+    if(year != "0"):
+        query= {
+                "query": {
+                    "bool": {
+                        "must": [
+                        {
+                            "query_string": {
+                                "fields" : field,
+                                "query" : search
+                            }
+                        },
+                        {
+                            "range" : {
+                                "date": {
+                                    "gte": year + "||/y",
+                                    "lte": year + "||/y",
+                                    "format": "yyyy"
+                                }
                             }
                         }
+                        ]
                     }
-                    ]
+                },
+                "aggregations": {
+                    "wordCloudInfo" : {
+                        "significant_terms" : {"field": "title"}
+                    }
+                }
+            }
+    else:
+        query = {
+            "query" : {
+                "query_string": {
+                    "fields": field,
+                    "query": search
                 }
             },
             "aggregations": {
@@ -93,61 +117,6 @@ if __name__ == '__main__':
                     "significant_terms" : {"field": "title"}
                 }
             }
-        }
-    if(title == "Yes" and text == "Yes"):
-        query= {
-            "query": {
-                "filtered": {
-                    "query": {
-                        "query_string": {
-                            "fields": ["title", "text"],
-                            "query" : search
-                        }
-                    },
-                    "filter": {
-                       "range": {
-                            "date": {
-                                "gte": year + "||/y",
-                                "lte": year + "||/y",
-                                "format": "yyyy"
-                            }
-                        }
-                    }
-                }
-            }
-            # "aggregations": {
-            #     "wordCloudInfo" : {
-            #         "significant_terms" : {"field": "title"}
-            #     }
-            # }
-        }
-
-    elif(title == "Yes" and text != "Yes"):
-        query= {
-            "query": {
-                "filtered": {
-                    "query": {
-                        "query_string": {
-                            "fields": ["title", "text"],
-                            "query" : search
-                        }
-                    },
-                    "filter": {
-                       "range": {
-                            "date": {
-                                "gte": year + "||/y",
-                                "lte": year + "||/y",
-                                "format": "yyyy"
-                            }
-                        }
-                    }
-                }
-            }
-            # "aggregations": {
-            #     "wordCloudInfo" : {
-            #         "significant_terms" : {"field": "title"}
-            #     }
-            # }
         }
 
 
@@ -160,6 +129,8 @@ if __name__ == '__main__':
     query = es.search(body=query, index='telegraaf', size=amount_of_results)
     for result in query['hits']['hits']:
         title = result['_source']['title']
+        if title == "":
+            title = "No title"
         try:
             link = result['_source']['link']
         except(KeyError):
