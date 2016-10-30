@@ -1,24 +1,20 @@
-<html>
-<body>
+  <html>
+  <body>
 
-<form action="zoekmachine.php" method="post">
-  <input type="text" name="keyword">
-  Title
-  <input type="checkbox" name="titleform" value="Yes" />
-  Text
-  <input type="checkbox" name="textform" value="Yes" />
-  <input type="submit" value="Search!">
-</form>
-</body>
-</html>
+  <form action="zoekmachine.php" method="post">
+    <input type="text" name="keyword">
+    Title
+    <input type="checkbox" name="titleform" value="Yes" />
+    Text
+    <input type="checkbox" name="textform" value="Yes" />
+    <input type="submit" value="Search!">
+  </form>
+  </body>
+  </html>
 
 
 
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "root";
-
 if(!empty($_POST['keyword']))
 {
 	if(isset($_POST['titleform']) && $_POST['titleform'] == 'Yes'){
@@ -33,6 +29,8 @@ if(!empty($_POST['keyword']))
 	else {
 		$text = 'No';
 	}
-	$output = passthru("python finalass.py ".$_POST['keyword']." ".$title." ".$text);
-	echo $output;
+  $year = "1972";
+    $output = passthru("/usr/bin/python /var/www/html/finalass.py ".$_POST['keyword']." ".$title." ".$text . " ".$year);
+    echo $output;
 }
+?>

@@ -1,9 +1,4 @@
-import gzip
-import xmltodict, json
-from xml.dom.minidom import parse, parseString
-from elasticsearch import  helpers
 from elasticsearch import Elasticsearch
-from nltk import tokenize
 import sys
 import re
 
@@ -164,7 +159,6 @@ if __name__ == '__main__':
     amount_of_results = 100
     query = es.search(body=query, index='telegraaf', size=amount_of_results)
     for result in query['hits']['hits']:
-
         title = result['_source']['title']
         try:
             link = result['_source']['link']
@@ -173,11 +167,11 @@ if __name__ == '__main__':
         print(("<a href=" + link + ">" + title + "</a></br>").encode('utf-8'))
         print((result['_source']['date'] + "</br>").encode('utf-8'))
         text = result['_source']['text']
-        sentences = tokenize.sent_tokenize(text)
+        sentences = re.split('(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
         if search in text:
             for i in range(len(sentences)):
                 if(search in sentences[i]):
-                    sentences[i] = (re.sub(r'%s' % search, '<b>%s</b>' % search , sentences[i]))
+                    sentences[i] = (re.sub(r'(?<=[\.\s]){0}(?=[\.\s])|^{0}(?=[\.\s])'.format(search), '<b>{0}</b>'.format(search), sentences[i]))
                     if i == 0:
                         serp = ' '.join(sentences[i:i+2]) + " ... </br></br>"
                     elif i == len(sentences) - 1:
