@@ -73,7 +73,7 @@ if __name__ == '__main__':
     elif(title == "No" and text == "Yes"):
         field = ["text"]
     else:
-        field = ["text", "title"]
+        field = ["text"]
 
     if(year != "0"):
         query= {
