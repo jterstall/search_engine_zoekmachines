@@ -8,6 +8,7 @@ import sys
 search = sys.argv[1]
 title = sys.argv[2]
 text = sys.argv[3]
+year = sys.argv[4]
 # GET DATE FROM ARTICLE
 def get_date(i):
     return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:date']['#text']
@@ -68,46 +69,87 @@ if __name__ == '__main__':
     # }'
 
     query= {
-        "query": {
-            "query_string": {
-                "default_field": "text",
-                "query" : search
+            "query": {
+                "filtered": {
+                    "query": {
+                        "query_string": {
+                            "fields": ["title", "text"],
+                            "query" : search
+                        }
+                    },
+                    "filter": {
+                       "range": {
+                            "date": {
+                                "gte": year + "||/y",
+                                "lte": year + "||/y",
+                                "format": "yyyy"
+                            }
+                        }
+                    }
+                }
             }
-        },
-        "aggregations": {
-            "wordCloudInfo" : {
-                "significant_terms" : {"field": "title"}
-            }
+            # "aggregations": {
+            #     "wordCloudInfo" : {
+            #         "significant_terms" : {"field": "title"}
+            #     }
+            # }
         }
-    }
     if(title == "Yes" and text == "Yes"):
         query= {
             "query": {
-                "query_string": {
-                    "fields" : ['title', 'text'],
-                    "query" : search
-                }
-            },
-            "aggregations": {
-                "wordCloudInfo" : {
-                    "significant_terms" : {"field": "title"}
+                "filtered": {
+                    "query": {
+                        "query_string": {
+                            "fields": ["title", "text"],
+                            "query" : search
+                        }
+                    },
+                    "filter": {
+                       "range": {
+                            "date": {
+                                "gte": year + "||/y",
+                                "lte": year + "||/y",
+                                "format": "yyyy"
+                            }
+                        }
+                    }
                 }
             }
+            # "aggregations": {
+            #     "wordCloudInfo" : {
+            #         "significant_terms" : {"field": "title"}
+            #     }
+            # }
         }
+
     elif(title == "Yes" and text != "Yes"):
         query= {
             "query": {
-                "query_string": {
-                    "default_field": "title",
-                    "query" : search
-                }
-            },
-            "aggregations": {
-                "wordCloudInfo" : {
-                    "significant_terms" : {"field": "title"}
+                "filtered": {
+                    "query": {
+                        "query_string": {
+                            "fields": ["title", "text"],
+                            "query" : search
+                        }
+                    },
+                    "filter": {
+                       "range": {
+                            "date": {
+                                "gte": year + "||/y",
+                                "lte": year + "||/y",
+                                "format": "yyyy"
+                            }
+                        }
+                    }
                 }
             }
+            # "aggregations": {
+            #     "wordCloudInfo" : {
+            #         "significant_terms" : {"field": "title"}
+            #     }
+            # }
         }
+        
 
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
 
@@ -117,11 +159,10 @@ if __name__ == '__main__':
     amount_of_results = 100
     query = es.search(body=query, index='telegraaf', size=100)
     for result in query['hits']['hits']:
-        print(result['_source']['title'] + "\n")
-        print(result['_source']['date'] + "\n")
-        print(result['_source']['text'] + "\n")
+        title = result['_source']['title'].encode('utf-8')
         try:
-            print(result['_source']['link'] + "\n")
+            link = result['_source']['link'] + "</br></br>"
         except(KeyError):
-            print("No link \n")
-    print(query['aggregations'])
+            link = "No link </br></br>"
+        print("<a href=" + link + ">" + title + "</a></br>")
+    # print(query['aggregations'])
