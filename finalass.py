@@ -127,6 +127,7 @@ if __name__ == '__main__':
     # Or use limited size
     amount_of_results = 100
     query = es.search(body=query, index='telegraaf', size=amount_of_results)
+    print(("It took " + str(query['took']) + " seconds to execute the query which resulted into " + str(query['hits']['total']) + " hits </br></br>").encode('utf-8'))
     for result in query['hits']['hits']:
         title = result['_source']['title']
         if title == "":
@@ -153,4 +154,4 @@ if __name__ == '__main__':
         else:
             serp = ' '.join(sentences[:3]) + " ... </br></br>"
         print(serp.encode('utf-8'))
-    print(query['aggregations'])
+    # print(query['aggregations'])
