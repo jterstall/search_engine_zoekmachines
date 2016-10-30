@@ -149,7 +149,7 @@ if __name__ == '__main__':
             #     }
             # }
         }
-        
+
 
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
 
@@ -157,12 +157,30 @@ if __name__ == '__main__':
     # amount_of_results = es.search(body=query, index='_all')['hits']['total']
     # Or use limited size
     amount_of_results = 100
-    query = es.search(body=query, index='telegraaf', size=100)
+    query = es.search(body=query, index='telegraaf', size=amount_of_results)
     for result in query['hits']['hits']:
-        title = result['_source']['title'].encode('utf-8')
+
+        title = result['_source']['title']
         try:
-            link = result['_source']['link'] + "</br></br>"
+            link = result['_source']['link']
         except(KeyError):
-            link = "No link </br></br>"
-        print("<a href=" + link + ">" + title + "</a></br>")
-    # print(query['aggregations'])
+            link = ""
+        print(("<a href=" + link + ">" + title + "</a></br>").encode('utf-8'))
+        print((result['_source']['date'] + "</br>").encode('utf-8'))
+        text = result['_source']['text']
+        sentences = tokenize.sent_tokenize(text)
+        if search in text:
+            for i in range(len(sentences)):
+                if(search in sentences[i]):
+                    sentences[i] = (re.sub(r'%s' % search, '<b>%s</b>' % search , sentences[i]))
+                    if i == 0:
+                        serp = ' '.join(sentences[i:i+2]) + " ... </br></br>"
+                    elif i == len(sentences) - 1:
+                        serp = "... " + ' '.join(sentences[i-2:i]) + "</br></br>"
+                    else:
+                        serp = ' '.join(sentences[i-1:i+1]) + " ... </br></br>"
+                    break
+        else:
+            serp = ' '.join(sentences[:3]) + " ... </br></br>"
+        print(serp.encode('utf-8'))
+    print(query['aggregations'].encode('utf-8'))
