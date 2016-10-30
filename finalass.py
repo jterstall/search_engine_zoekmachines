@@ -3,12 +3,15 @@ import xmltodict, json
 from xml.dom.minidom import parse, parseString
 from elasticsearch import  helpers
 from elasticsearch import Elasticsearch
+from nltk import tokenize
 import sys
+import re
 
 search = sys.argv[1]
 title = sys.argv[2]
 text = sys.argv[3]
 year = sys.argv[4]
+
 # GET DATE FROM ARTICLE
 def get_date(i):
     return o['pm:KBroot']['pm:root'][i]['pm:meta']['dc:date']['#text']
@@ -70,15 +73,16 @@ if __name__ == '__main__':
 
     query= {
             "query": {
-                "filtered": {
-                    "query": {
+                "bool": {
+                    "must": [
+                    {
                         "query_string": {
-                            "fields": ["title", "text"],
+                            "fields" : ["title", "text"],
                             "query" : search
                         }
                     },
-                    "filter": {
-                       "range": {
+                    {
+                        "range" : {
                             "date": {
                                 "gte": year + "||/y",
                                 "lte": year + "||/y",
@@ -86,13 +90,14 @@ if __name__ == '__main__':
                             }
                         }
                     }
+                    ]
+                }
+            },
+            "aggregations": {
+                "wordCloudInfo" : {
+                    "significant_terms" : {"field": "title"}
                 }
             }
-            # "aggregations": {
-            #     "wordCloudInfo" : {
-            #         "significant_terms" : {"field": "title"}
-            #     }
-            # }
         }
     if(title == "Yes" and text == "Yes"):
         query= {
@@ -183,4 +188,4 @@ if __name__ == '__main__':
         else:
             serp = ' '.join(sentences[:3]) + " ... </br></br>"
         print(serp.encode('utf-8'))
-    print(query['aggregations'].encode('utf-8'))
+    print(query['aggregations'])
