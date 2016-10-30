@@ -47,8 +47,6 @@ if __name__ == '__main__':
     HOST = 'http://localhost:9200/'
     es = Elasticsearch(hosts=[HOST], timeout=60)
     es.indices.clear_cache(index='telegraaf')
-
-    text = input("Please input a query: ")
     # Run deze twee in terminal
     # curl -XPUT 'localhost:9200/telegraaf/_mapping/article?pretty' -d'
     # {
